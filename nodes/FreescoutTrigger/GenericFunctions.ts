@@ -25,3 +25,32 @@ export function verifySignature(
 	if (a.length !== b.length) return false;
 	return timingSafeEqual(a, b);
 }
+
+/**
+ * FreeScout webhooks cannot be limited to a mailbox when they are registered
+ * (only `url` and `events` are accepted), so mailbox filtering happens on
+ * delivery. Conversation payloads carry the mailbox as `mailboxId`.
+ */
+export function getPayloadMailboxId(payload: Record<string, unknown>): number | undefined {
+	const embedded = payload._embedded as Record<string, unknown> | undefined;
+	const mailbox = (payload.mailbox ?? embedded?.mailbox) as Record<string, unknown> | undefined;
+	const raw = payload.mailboxId ?? mailbox?.id;
+	const id = Number(raw);
+	return raw === undefined || raw === null || raw === '' || Number.isNaN(id) ? undefined : id;
+}
+
+/**
+ * Whether a delivery passes the mailbox filter. An empty selection means "all
+ * mailboxes". Only conversation events (`convo.*`) belong to a mailbox; other
+ * events such as `customer.created` always pass.
+ */
+export function matchesMailboxFilter(
+	event: string,
+	payload: Record<string, unknown>,
+	mailboxIds: number[],
+): boolean {
+	if (mailboxIds.length === 0) return true;
+	if (!event.startsWith('convo.')) return true;
+	const id = getPayloadMailboxId(payload);
+	return id !== undefined && mailboxIds.includes(id);
+}

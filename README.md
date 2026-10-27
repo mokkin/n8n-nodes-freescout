@@ -167,6 +167,14 @@ Select one or more of the following events to listen for:
 | `customer.created` | New customer created |
 | `customer.updated` | Customer details updated |
 
+### Limiting to specific mailboxes
+
+Use the **Mailboxes** option to pick one or more mailboxes. Only conversation events (`convo.*`) from those mailboxes start the workflow; deliveries from other mailboxes are acknowledged but ignored. Leave it empty to receive events from all mailboxes.
+
+- FreeScout can't restrict a webhook to a mailbox, so the filter is applied by the node when a delivery arrives.
+- Customer events (`customer.created`, `customer.updated`) aren't tied to a mailbox and always trigger.
+- For `convo.moved` the mailbox the conversation was moved **to** is matched.
+
 ### Signature verification
 
 FreeScout signs webhook deliveries with an `X-FreeScout-Signature` header: `base64(HMAC-SHA1(rawBody, secret))`, where `secret` is the **Secret Key** displayed in FreeScout under **Manage → API & Webhooks** (internally this is `md5(APP_KEY + "webhook_key")`, but you only need the value shown in the UI — copy it as-is).

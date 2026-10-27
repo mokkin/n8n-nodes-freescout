@@ -7,6 +7,10 @@ dated release when a version is cut.
 
 ## [Unreleased]
 
+### Added
+
+- The **FreeScout Trigger** has a new **Mailboxes** option: pick one or more mailboxes and only conversation events from those mailboxes start the workflow. Leave it empty to receive events from all mailboxes. Customer events aren't tied to a mailbox and always trigger.
+
 ## 0.4.0 - 2026-07-08
 
 ### Added

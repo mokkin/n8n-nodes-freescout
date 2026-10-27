@@ -2,6 +2,8 @@ import {
 	NodeConnectionTypes,
 	NodeApiError,
 	type IHookFunctions,
+	type ILoadOptionsFunctions,
+	type INodePropertyOptions,
 	type IWebhookFunctions,
 	type INodeType,
 	type INodeTypeDescription,
@@ -10,20 +12,22 @@ import {
 	type IDataObject,
 	type JsonObject,
 } from 'n8n-workflow';
-import { verifySignature } from './GenericFunctions';
+import { matchesMailboxFilter, verifySignature } from './GenericFunctions';
 import { WEBHOOK_EVENTS } from '../Freescout/resources/webhook/create';
 
 async function freescoutApiRequest(
-	this: IHookFunctions,
+	this: IHookFunctions | ILoadOptionsFunctions,
 	method: IHttpRequestMethods,
 	resource: string,
 	body: IDataObject = {},
+	qs: IDataObject = {},
 ): Promise<IDataObject> {
 	const credentials = await this.getCredentials('freescoutApi');
 	const baseUrl = (credentials.baseUrl as string).replace(/\/+$/, '');
 	const options = {
 		method,
 		body,
+		qs,
 		url: `${baseUrl}/api${resource}`,
 		headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
 		json: true,
@@ -73,6 +77,15 @@ export class FreescoutTrigger implements INodeType {
 				description: 'FreeScout events that trigger the workflow',
 			},
 			{
+				displayName: 'Mailbox Names or IDs',
+				name: 'mailboxIds',
+				type: 'multiOptions',
+				typeOptions: { loadOptionsMethod: 'getMailboxes' },
+				default: [],
+				description:
+					'Only trigger for conversation events from these mailboxes. Leave empty for all mailboxes. Customer events are not tied to a mailbox and always trigger. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			},
+			{
 				displayName:
 					'Signature verification runs only if the "Webhook Secret Key" is set on the credential. Without it, deliveries are accepted unverified.',
 				name: 'signatureNotice',
@@ -80,6 +93,29 @@ export class FreescoutTrigger implements INodeType {
 				default: '',
 			},
 		],
+	};
+
+	methods = {
+		loadOptions: {
+			async getMailboxes(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const options: INodePropertyOptions[] = [];
+				let page = 1;
+				let totalPages = 1;
+				do {
+					const response = await freescoutApiRequest.call(this, 'GET', '/mailboxes', {}, { page });
+					const embedded = (response._embedded as IDataObject) ?? {};
+					for (const mailbox of (embedded.mailboxes as IDataObject[]) ?? []) {
+						options.push({
+							name: `${mailbox.name as string} (${mailbox.email as string})`,
+							value: mailbox.id as number,
+						});
+					}
+					totalPages = ((response.page as IDataObject)?.totalPages as number) ?? 1;
+					page++;
+				} while (page <= totalPages);
+				return options;
+			},
+		},
 	};
 
 	webhookMethods = {
@@ -145,6 +181,12 @@ export class FreescoutTrigger implements INodeType {
 		// `event` field alongside the entity payload so workflows can branch on it.
 		const event = (req.headers['x-freescout-event'] as string) ?? '';
 		const body = this.getBodyData() as IDataObject;
+
+		// FreeScout can't scope a webhook to a mailbox, so skip deliveries from
+		// other mailboxes here (no execution is started).
+		const mailboxIds = (this.getNodeParameter('mailboxIds', []) as Array<number | string>).map(Number);
+		if (!matchesMailboxFilter(event, body, mailboxIds)) return {};
+
 		return { workflowData: [this.helpers.returnJsonArray({ event, ...body })] };
 	}
 }
