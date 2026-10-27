@@ -5,6 +5,8 @@ import { customerDescription } from './resources/customer';
 import { organizationDescription } from './resources/organization';
 import { userDescription } from './resources/user';
 import { mailboxDescription } from './resources/mailbox';
+import { reportDescription } from './resources/report';
+import { timelogDescription } from './resources/timelog';
 import { tagDescription } from './resources/tag';
 import { webhookDescription } from './resources/webhook';
 
@@ -40,8 +42,10 @@ export class Freescout implements INodeType {
 					{ name: 'Customer', value: 'customer' },
 					{ name: 'Mailbox', value: 'mailbox' },
 					{ name: 'Organization', value: 'organization' },
+					{ name: 'Report', value: 'report' },
 					{ name: 'Tag', value: 'tag' },
 					{ name: 'Thread', value: 'thread' },
+					{ name: 'Timelog', value: 'timelog' },
 					{ name: 'User', value: 'user' },
 					{ name: 'Webhook', value: 'webhook' },
 				],
@@ -53,7 +57,9 @@ export class Freescout implements INodeType {
 			...organizationDescription,
 			...userDescription,
 			...mailboxDescription,
+			...reportDescription,
 			...tagDescription,
+			...timelogDescription,
 			...webhookDescription,
 		],
 	};

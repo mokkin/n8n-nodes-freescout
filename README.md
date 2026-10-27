@@ -105,13 +105,27 @@ Create a **FreeScout API** credential in n8n with three fields:
 | Create | Create a new user |
 | Get | Retrieve a user by ID |
 | Get Many | List users |
+| Get Current User | Retrieve the user that owns the API key (per-user API keys only) |
 | Delete | Delete a user |
+
+#### Report
+
+| Operation | Description |
+|---|---|
+| Get | Fetch a `conversations`, `productivity`, `satisfaction` or `time` report, with optional date, mailbox, type, user and tag filters and chart options |
 
 #### Tag
 
 | Operation | Description |
 |---|---|
 | Get Many | List all tags |
+
+#### Timelog
+
+| Operation | Description |
+|---|---|
+| Create | Add a finished time entry (duration in seconds) to a conversation |
+| Get Many | List timelogs across all conversations, filtered by conversation, user and date range |
 
 #### Webhook
 
@@ -134,6 +148,8 @@ In addition, some individual operations require further optional FreeScout modul
 | Conversation → Update Custom Fields | [CustomFields](https://freescout.net/module/custom-fields/) |
 | Customer → Update Customer Fields | [CustomFields](https://freescout.net/module/custom-fields/) |
 | Mailbox → Get Custom Fields | [CustomFields](https://freescout.net/module/custom-fields/) |
+| Conversation → Get Timelogs, Timelog resource (all operations) | [Time Tracking](https://freescout.net/module/time-tracking/) |
+| Report resource (all operations) | [Reports](https://freescout.net/module/reports/) |
 | Conversation → Get Many (tag filter) | [Tags](https://freescout.net/module/tags/) |
 | Organization resource (all operations) | [CRM (Customers Management)](https://freescout.net/module/crm/) |
 | Customer → Get/Set/Remove Organization | [CRM (Customers Management)](https://freescout.net/module/crm/) |

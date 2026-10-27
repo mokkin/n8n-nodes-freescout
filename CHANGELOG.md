@@ -9,6 +9,10 @@ dated release when a version is cut.
 
 ### Added
 
+- **Report → Get**: fetch the Conversations, Productivity, Satisfaction and Time reports from the Reports module, with filters (date range, mailbox, type, user, tag) and chart options (dataset and day/week/month grouping).
+- **Timelog** resource: **Create** adds a finished time entry to a conversation, and **Get Many** lists timelogs across all conversations, filtered by conversation, user and date range.
+- **User → Get Current User**: returns the user that owns the API key (per-user API keys only).
+
 - The **FreeScout Trigger** has a new **Mailboxes** option: pick one or more mailboxes and only conversation events from those mailboxes start the workflow. Leave it empty to receive events from all mailboxes. Customer events aren't tied to a mailbox and always trigger.
 
 ## 0.4.0 - 2026-07-08
